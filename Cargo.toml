@@ -1,0 +1,24 @@
+[package]
+name = "crates2pkgbuild"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+dirs = "5.0.1"
+flate2 = "1.0.30"
+http = "1.1.0"
+serde = { version = "1.0.202", features = ["derive"] }
+serde_json = "1.0.117"
+sha2 = "0.10.8"
+spdx = "0.10.4"
+tar = { version = "0.4.40", default-features = false }
+toml = "0.8.13"
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+ureq = { version = "2.9.7", features = ["http-crate"] }
+
+[dev-dependencies]
+insta = { version = "1.39.0", features = ["serde"] }
+tempfile = "3.10.1"
+tiny_http = "0.12.0"

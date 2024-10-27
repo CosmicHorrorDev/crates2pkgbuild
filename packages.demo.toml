@@ -1,0 +1,52 @@
+maintainers = ["Test <dummy@web.site>"]
+arch = ["x86_64"]
+deps = ["gcc-libs"]
+# TODO: automatically set this since we require it for building after all
+make-deps = ["cargo"]
+
+# Ensures a more stable building experience even though `stable` is still
+# rolling
+[env.RUSTUP_TOOLCHAIN]
+value = "stable"
+steps = ["prepare", "build", "check"]
+
+# Paths get messed up and build artifacts can get muddled when a user sets a
+# custom target dir
+[env.CARGO_TARGET_DIR]
+value = "target"
+steps = ["build", "check"]
+
+[crate.cargo-pgo]
+version = "0.2.8"
+missing-license-files = true
+
+[crate.inlyne]
+version = "0.4.2"
+deps = [
+    "fontconfig", "freetype2", "libxcursor", "libxi", "libxrandr",
+    "oniguruma"
+]
+make-deps = ["libffi", "libxcb", "libxkbcommon", "wayland"]
+test-in-check = true
+static-completions-within = "completions"
+[crate.inlyne.env.RUSTONIG_SYSTEM_LIBONIG]
+value = "yes"
+steps = ["build", "check"]
+
+[crate.ra-multiplex]
+contributors = ["A. B. <AB@dne>"]
+version = "0.2.4"
+# TODO: figure out how we want to create the systemd service unit. Probably some
+# `include-file` directive?
+
+[crate.regex-cli]
+arch = ["i686"]
+version = "0.2.0"
+
+[crate.to-html]
+maintainers = ["A <ls@d.ne>"]
+contributors = ["Doesn't Exist <d@ne>"]
+version = "0.1.5"
+test-in-check = true
+deps = ["util-linux"]
+find-build-completions = ["bash", "fish", "zsh"]

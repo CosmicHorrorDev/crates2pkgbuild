@@ -1,0 +1,74 @@
+---
+source: src/tests/snaps.rs
+expression: pkgbuild
+info:
+  name: regex-cli
+  val:
+    maintainers:
+      - Test <dummy@web.site>
+    contributors: []
+    version: 0.2.0
+    release-version: 1
+    arch:
+      - i686
+      - x86_64
+    deps:
+      - gcc-libs
+    make-deps:
+      - cargo
+    env:
+      CARGO_TARGET_DIR:
+        value: target
+        steps:
+          - build
+          - check
+      RUSTUP_TOOLCHAIN:
+        value: stable
+        steps:
+          - build
+          - check
+          - prepare
+    test-in-check: false
+    missing-license-files: false
+    find-build-completions: []
+    static-completions-within: ~
+---
+# Maintainer: Test <dummy@web.site>
+
+pkgname=regex-cli
+pkgver=0.2.0
+pkgrel=1
+arch=(i686 x86_64)
+license=(APACHE MIT)
+pkgdesc='A command line tool for debugging, ad hoc benchmarking and generating regular expressions.'
+url='https://github.com/rust-lang/regex/tree/master/regex-cli'
+depends=(gcc-libs)
+makedepends=(cargo)
+source=("$pkgname-$pkgver.tar.gz::https://static.crates.io/crates/$pkgname/$pkgname-$pkgver.crate")
+# Upstream checksum. Can be verified with
+# $ curl https://index.crates.io/re/ge/regex-cli | grep -F '"0.2.0"' | jq .cksum
+sha256sums=(39f7ce0d947e84b214f283e0dbb61685d1df0e937c911f5c7e488bd84af72da4)
+
+prepare() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  export CARGO_TARGET_DIR=target
+  export RUSTUP_TOOLCHAIN=stable
+  cargo build --frozen --release
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  install -Dm755 target/release/regex-cli "$pkgdir/usr/bin/regex-cli"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}
+
+# vi: filetype=sh shiftwidth=2 expandtab

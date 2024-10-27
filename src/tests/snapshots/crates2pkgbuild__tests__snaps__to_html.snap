@@ -1,0 +1,92 @@
+---
+source: src/tests/snaps.rs
+expression: pkgbuild
+info:
+  name: to-html
+  val:
+    maintainers:
+      - Test <dummy@web.site>
+      - A <ls@d.ne>
+    contributors:
+      - "Doesn't Exist <d@ne>"
+    version: 0.1.5
+    release-version: 1
+    arch:
+      - x86_64
+    deps:
+      - gcc-libs
+      - util-linux
+    make-deps:
+      - cargo
+    env:
+      CARGO_TARGET_DIR:
+        value: target
+        steps:
+          - build
+          - check
+      RUSTUP_TOOLCHAIN:
+        value: stable
+        steps:
+          - build
+          - check
+          - prepare
+    test-in-check: true
+    missing-license-files: false
+    find-build-completions:
+      - bash
+      - fish
+      - zsh
+    static-completions-within: ~
+---
+# Maintainer: Test <dummy@web.site>
+# Maintainer: A <ls@d.ne>
+# Contributor: Doesn't Exist <d@ne>
+
+pkgname=to-html
+pkgver=0.1.5
+pkgrel=1
+arch=(x86_64)
+license=(MIT)
+pkgdesc='Render a terminal with ANSI colors as HTML'
+url='https://github.com/Aloso/to-html'
+depends=(gcc-libs util-linux)
+makedepends=(cargo findutils)
+source=("$pkgname-$pkgver.tar.gz::https://static.crates.io/crates/$pkgname/$pkgname-$pkgver.crate")
+# Upstream checksum. Can be verified with
+# $ curl https://index.crates.io/to/-h/to-html | grep -F '"0.1.5"' | jq .cksum
+sha256sums=(508d9062192923b983587b1fd9682a201daf6693657b1d32c29d7007a44d0fda)
+
+prepare() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  export CARGO_TARGET_DIR=target
+  export RUSTUP_TOOLCHAIN=stable
+  cargo build --frozen --release
+}
+
+check() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  export CARGO_TARGET_DIR=target
+  export RUSTUP_TOOLCHAIN=stable
+  cargo test --release --locked
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  install -Dm755 target/release/to-html "$pkgdir/usr/bin/to-html"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+  find . -name to-html -type f -exec install -D644 {} $pkgdir/usr/share/bash-completion/completions/to-html \;
+  find . -name to-html.fish -type f -exec install -D644 {} $pkgdir/usr/share/fish/vendor_completions.d/to-html.fish \;
+  find . -name _to-html -type f -exec install -D644 {} $pkgdir/usr/share/zsh/site-functions/_to-html \;
+}
+
+# vi: filetype=sh shiftwidth=2 expandtab

@@ -1,0 +1,75 @@
+---
+source: src/tests/snaps.rs
+expression: pkgbuild
+info:
+  name: ra-multiplex
+  val:
+    maintainers:
+      - Test <dummy@web.site>
+    contributors:
+      - A. B. <AB@dne>
+    version: 0.2.4
+    release-version: 1
+    arch:
+      - x86_64
+    deps:
+      - gcc-libs
+    make-deps:
+      - cargo
+    env:
+      CARGO_TARGET_DIR:
+        value: target
+        steps:
+          - build
+          - check
+      RUSTUP_TOOLCHAIN:
+        value: stable
+        steps:
+          - build
+          - check
+          - prepare
+    test-in-check: false
+    missing-license-files: false
+    find-build-completions: []
+    static-completions-within: ~
+---
+# Maintainer: Test <dummy@web.site>
+# Contributor: A. B. <AB@dne>
+
+pkgname=ra-multiplex
+pkgver=0.2.4
+pkgrel=1
+arch=(x86_64)
+license=(MIT)
+pkgdesc='share one rust-analyzer server instance between multiple LSP clients to save resources'
+url='https://github.com/pr2502/ra-multiplex'
+depends=(gcc-libs)
+makedepends=(cargo)
+source=("$pkgname-$pkgver.tar.gz::https://static.crates.io/crates/$pkgname/$pkgname-$pkgver.crate")
+# Upstream checksum. Can be verified with
+# $ curl https://index.crates.io/ra/-m/ra-multiplex | grep -F '"0.2.4"' | jq .cksum
+sha256sums=(772c0b59e62f023027390ea15aa7f139ac8b46b38655bfbc298e8105a6ca7f3b)
+
+prepare() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  export CARGO_TARGET_DIR=target
+  export RUSTUP_TOOLCHAIN=stable
+  cargo build --frozen --release
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  install -Dm755 target/release/ra-multiplex "$pkgdir/usr/bin/ra-multiplex"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}
+
+# vi: filetype=sh shiftwidth=2 expandtab
